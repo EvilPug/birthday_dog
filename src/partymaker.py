@@ -7,10 +7,12 @@ from telethon.sync import TelegramClient
 from telethon.tl.functions.messages import ExportChatInviteRequest
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest, EditPhotoRequest
 
-from src.models import User
-from src import data, config
-from src.logger import logging
-from src.utils import signin, FindBirthday
+import data
+import config
+from models import User
+from logger import logging
+from utils import signin, FindBirthday
+
 
 class PartyMaker:
     """

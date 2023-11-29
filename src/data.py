@@ -3,9 +3,9 @@ from sqlalchemy import select, exc
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound
 
-from src.config import engine
-from src.logger import logging
-from src.models import User, Chat, Account
+from config import engine
+from logger import logging
+from models import User, Chat, Account
 
 
 def make_session() -> sessionmaker:

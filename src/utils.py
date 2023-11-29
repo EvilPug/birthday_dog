@@ -3,9 +3,10 @@ from typing import List
 from datetime import datetime
 from telethon.sync import TelegramClient
 
-from src.models import User
-from src import data, config
-from src.logger import logging
+import data
+import config
+from models import User
+from logger import logging
 
 
 def signin(bot_api_id: str, bot_api_hash: str) -> TelegramClient:
