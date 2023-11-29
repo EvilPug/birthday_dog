@@ -1,11 +1,12 @@
 from typing import List
 from telethon.sync import TelegramClient
 
-from src.models import User
-from src import data, config
-from src.partymaker import PartyMaker
-from src.partycleaner import PartyCleaner
-from src.utils import FindBirthday, ChatTools, signin
+import data
+import config
+from models import User
+from partymaker import PartyMaker
+from partycleaner import PartyCleaner
+from utils import FindBirthday, ChatTools, signin
 
 
 def main(chat_users: List[User], client: TelegramClient):

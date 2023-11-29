@@ -5,10 +5,11 @@ from telethon.tl.functions.channels import DeleteChannelRequest, GetChannelsRequ
 from telethon.errors.rpcerrorlist import ChannelPrivateError
 from telethon.tl.types import PeerChannel
 
-from src.models import Chat
-from src import data, config
-from src.logger import logging
-from src.utils import signin, FindBirthday
+import data
+import config
+from models import Chat
+from logger import logging
+from utils import signin, FindBirthday
 
 
 class PartyCleaner:
