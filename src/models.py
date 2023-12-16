@@ -11,23 +11,21 @@ class User(Base):
     __tablename__ = 'users'
     tg_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(String(32), nullable=True, unique=True)
-    first_name: Mapped[str] = mapped_column(String(32), nullable=False)
-    short_name: Mapped[str] = mapped_column(String(32), nullable=False)
-    middle_name: Mapped[str] = mapped_column(String(32), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(32), nullable=False)
-    block: Mapped[str] = mapped_column(String(32), nullable=False, default='dppu')
-    birth_day: Mapped[int] = mapped_column(Integer, nullable=False)
-    birth_month: Mapped[int] = mapped_column(Integer, nullable=False)
+    short_name: Mapped[str] = mapped_column(String(32), nullable=True)
+    last_name: Mapped[str] = mapped_column(String(32), nullable=True)
+    birth_day: Mapped[int] = mapped_column(Integer, nullable=True)
+    birth_month: Mapped[int] = mapped_column(Integer, nullable=True)
+    gender: Mapped[str] = mapped_column(String(32), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     chats: Mapped[List["Chat"]] = relationship()
-    account: Mapped[List["Account"]] = relationship()
+    bank_account: Mapped[List["BankAccount"]] = relationship()
 
     def __repr__(self):
         return "User(tg_id=%s, username='%s', first_name='%s', last_name='%s', bday='%s.%s')" % (
             self.tg_id,
             self.username,
-            self.first_name,
+            self.short_name,
             self.last_name,
             self.birth_day,
             self.birth_month
@@ -46,7 +44,7 @@ class Chat(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     user: Mapped["User"] = relationship(back_populates="chats")
-    account: Mapped["Account"] = relationship(back_populates="chat")
+    bank_account: Mapped["BankAccount"] = relationship(back_populates="chat")
 
     def __repr__(self):
         return "Chat(id=%s, invite_link='%s', bdayer_id='%s', created_at='%s')" % (
@@ -57,17 +55,17 @@ class Chat(Base):
         )
 
 
-class Account(Base):
-    __tablename__ = 'accounts'
+class BankAccount(Base):
+    __tablename__ = 'bank_accounts'
     link: Mapped[str] = mapped_column(String(64), primary_key=True)
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.tg_id'))
     used_in: Mapped[int] = mapped_column(ForeignKey('chats.chat_id', ondelete='SET NULL'), nullable=True)
 
-    user: Mapped["User"] = relationship(back_populates="account")
-    chat: Mapped[Optional["Chat"]] = relationship(back_populates="account")
+    user: Mapped["User"] = relationship(back_populates="bank_account")
+    chat: Mapped[Optional["Chat"]] = relationship(back_populates="bank_account")
 
     def __repr__(self):
-        return "Account(link=%s, owner_id='%s', used_in='%s')" % (
+        return "BankAccount(link=%s, owner_id='%s', used_in='%s')" % (
             self.link,
             self.owner_id,
             self.used_in,

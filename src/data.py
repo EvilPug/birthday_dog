@@ -1,11 +1,11 @@
-from typing import List, Union
 from sqlalchemy import select, exc
+from typing import List, Union, Type
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound
 
 from config import engine
 from logger import logging
-from models import User, Chat, Account
+from models import Base, User, Chat, BankAccount
 
 
 def make_session() -> sessionmaker:
@@ -17,7 +17,17 @@ def make_session() -> sessionmaker:
     return sessionmaker(engine)
 
 
-def get_active_chats() -> List[Chat]:
+def create_db_and_tables() -> None:
+    """
+    Создает БД и таблицы
+    """
+    Base.metadata.create_all(engine)
+
+
+def get_active_chats() -> List[Type[Chat]]:
+    """
+    Возвращает список активных (не удаленных) чатов
+    """
 
     s = make_session()
     with s() as session:
@@ -40,7 +50,7 @@ def deactivate_chat(chat_id) -> Chat:
         chat.is_active = False
 
         try:
-            account = session.execute(select(Account).filter_by(used_in=chat_id)).scalar_one()
+            account = session.execute(select(BankAccount).filter_by(used_in=chat_id)).scalar_one()
             account.used_in = None
 
             session.commit()
@@ -69,7 +79,7 @@ def get_chat_bdayer(chat_id: int) -> Union[User, None]:
         return None
 
 
-def get_active_chats_for_user(user_id) -> List[Chat]:
+def get_active_chats_for_user(user_id) -> List[Type[Chat]]:
     """
     Проверяет, если активные чаты для пользователя
 
@@ -145,7 +155,7 @@ def get_user(tg_id) -> Union[User, None]:
             return None
 
 
-def get_all_users() -> List[User]:
+def get_all_users() -> List[Type[User]]:
 
     """
     Получить всех пользователей из таблицы users
@@ -160,7 +170,7 @@ def get_all_users() -> List[User]:
         return users
 
 
-def get_active_users() -> List[User]:
+def get_active_users() -> List[Type[User]]:
 
     """
     Получить всех пользователей из таблицы users
@@ -186,11 +196,11 @@ def get_account_link(chat_id) -> str:
     with s() as session:
 
         try:
-            existing_account = session.query(Account).filter(Account.used_in == chat_id).one()
+            existing_account = session.query(BankAccount).filter(BankAccount.used_in == chat_id).one()
             return existing_account.link
 
         except exc.NoResultFound:
-            free_account = session.query(Account).filter(Account.used_in == None).first()
+            free_account = session.query(BankAccount).filter(BankAccount.used_in == None).first()
             if free_account is not None:
                 free_account.used_in = chat_id
                 session.commit()
