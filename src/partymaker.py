@@ -265,10 +265,13 @@ if __name__ == '__main__':
         fb = FindBirthday(users)
         birthday_users = fb.birthday_users
 
-        bday_user = birthday_users[0]
-        print('Bday User: ', bday_user)
+        if len(birthday_users) != 0:
+            bday_user = birthday_users[0]
+            logging.info('Bday User: ', bday_user)
 
-        pm = PartyMaker(dog_client, chat_id, bday_user)
-        pm.make_party()
+            pm = PartyMaker(dog_client, chat_id, bday_user)
+            pm.make_party()
+        else:
+            logging.info('Нет именинников!')
 
     sys.exit(0)
