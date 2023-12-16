@@ -270,3 +270,5 @@ if __name__ == '__main__':
 
         pm = PartyMaker(dog_client, chat_id, bday_user)
         pm.make_party()
+
+    sys.exit(0)

@@ -1,3 +1,4 @@
+import sys
 import time
 from typing import List
 from telethon.sync import TelegramClient
@@ -83,6 +84,7 @@ class PartyCleaner:
             chat_info = self.client.get_entity(channel.chat_id)
             logging.info(f'Деактивирован канал в БД {chat_info.title}')
             time.sleep(10)
+        return
 
 
 if __name__ == '__main__':
@@ -91,3 +93,5 @@ if __name__ == '__main__':
     with dog_client:
         pc = PartyCleaner(dog_client)
         pc.clean_party()
+
+    sys.exit(0)

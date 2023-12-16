@@ -1,3 +1,4 @@
+import sys
 from typing import List
 from telethon.sync import TelegramClient
 
@@ -41,3 +42,5 @@ if __name__ == '__main__':
 
         users = data.get_active_users()
         main(users, dog_client)
+
+    sys.exit(0)
