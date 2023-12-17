@@ -163,7 +163,7 @@ class PartyMaker:
                                      "в контакты или изменить настройки приватности\n"
                                      )
             self.successfully_invited.append(user)
-            logging.info(f'Пользователю {user.first_name} {user.last_name} отправлено приглашение в чат')
+            logging.info(f'Пользователю {user.short_name} {user.last_name} отправлено приглашение в чат')
 
         except Exception as e:
             logging.info(f'Не удалось отправить приглашение пользователю. {user} Ошибка: {e}')
@@ -177,12 +177,17 @@ class PartyMaker:
 
         :return: список пользователей
         """
+
+        logging.info('Формируем список пользователей, которых необходимо пригласить.')
+
         invite_list = []
         for user in self.chat_users:
             if user.is_active:
                 if user.tg_id != self.bdayer.tg_id:
-                    invite_list.append(user)
+                    if user.tg_id not in config.ADMIN_IDS:
+                        invite_list.append(user)
 
+        logging.info(f'Список сформирован. Количество приглашенных (исколючая админов): {len(invite_list)}')
         return invite_list
 
     def invite_admins(self) -> None:
@@ -216,7 +221,7 @@ class PartyMaker:
                 self.client.edit_admin(self.channel.id, admin_id, is_admin=True, anonymous=False, title='друг собаки')
                 logging.info(f'Пользователю {admin_id} выданы права администратора')
 
-    def invite_users_to_channel(self, send_invites=True) -> None:
+    def invite_users_to_channel(self, send_invites=False) -> None:
         """
         Добавляет пользователей в чат, если позволяют их настройки приватности.
         Если добавить пользователя не удалось, ему отправляется ссылка с приглашением в личные сообщения
@@ -232,11 +237,12 @@ class PartyMaker:
 
                 self.client(InviteToChannelRequest(self.channel.id, [user.tg_id]))
                 self.successfully_added.append(user)
-                logging.info(f'Успешно добавлен {user.first_name} {user.tg_id} {num}/{len(invite_list)}')
+                logging.info(f'Успешно добавлен {user.short_name} {user.tg_id} {num}/{len(invite_list)}')
 
             # TODO: Обработать FloodWaitError и UserChannelsTooMuchError
             except Exception as e:
-                logging.info(e, f'Не удалось пригласить пользователя {user.first_name}. tgid: {user.tg_id}')
+                logging.info(e, f'Не удалось пригласить пользователя {user.short_name}. tgid: {user.tg_id}')
+
                 if send_invites:
                     self.send_unable_message(user)
 
@@ -266,8 +272,8 @@ if __name__ == '__main__':
         birthday_users = fb.birthday_users
 
         if len(birthday_users) != 0:
-            bday_user = birthday_users[0]
-            logging.info('Bday User: ', bday_user)
+            bday_user: User = birthday_users[0]
+            logging.info(f'Именинник: {bday_user}')
 
             pm = PartyMaker(dog_client, chat_id, bday_user)
             pm.make_party()
