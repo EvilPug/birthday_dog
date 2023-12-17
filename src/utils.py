@@ -9,7 +9,7 @@ from models import User
 from logger import logging
 
 
-def signin(bot_api_id: str, bot_api_hash: str) -> TelegramClient:
+def signin(bot_api_id: int, bot_api_hash: str) -> TelegramClient:
     client = TelegramClient('bot', bot_api_id, bot_api_hash)
     client.connect()
     if not client.is_user_authorized():
@@ -51,7 +51,8 @@ class FindBirthday:
         return self.birthday_users
 
     @staticmethod
-    def check_birthday(birth_month: int, birth_day: int, before=8, after=10) -> bool:
+    def check_birthday(birth_month: int, birth_day: int,
+                       before=config.DAYS_BEFORE, after=config.DAYS_AFTER) -> bool:
         """
         Получает на вход день рождения и проверяет, должен ли существовать чат
 
@@ -112,7 +113,7 @@ class ChatTools:
         not_in_db_ids = list(set(self.users_in_chat_ids).difference(self.users_in_db_ids))
         users = [u for u in self.users_in_chat if u.id in not_in_db_ids]
 
-        users_info = [(i.id, i.username, i.first_name, i.last_name) for i in users]
+        users_info = [(i.id, i.username, i.short_name, i.last_name) for i in users]
         logging.info(f'Найдены пользователи чата, не добавленные в БД: {users_info}', )
         return users
 
@@ -131,14 +132,14 @@ class ChatTools:
 
                 # Оповещаем администраторов об удаленном пользователе
                 for tg_id in config.ADMIN_IDS:
-                    self.client.send_message(tg_id, f'Удален пользователь {user.first_name} {user.last_name}'
+                    self.client.send_message(tg_id, f'Удален пользователь {user.short_name} {user.last_name}'
                                                     f', так как он покинул чат ЦПУ')
 
             except Exception as e:
                 # Оповещаем администраторов об ошибке
                 for tg_id in config.ADMIN_IDS:
                     self.client.send_message(tg_id,
-                                             f'Не удалось удалить пользователя {user.first_name} {user.last_name}\n'
+                                             f'Не удалось удалить пользователя {user.short_name} {user.last_name}\n'
                                              f'Ошибка: {e}')
 
     def notify_about_new_users(self):
@@ -151,5 +152,5 @@ class ChatTools:
 
         for user in new_users:
             for tg_id in config.ADMIN_IDS:
-                self.client.send_message(tg_id, f'Новый пользователь в чате: {user.first_name} {user.last_name}\n\n'
+                self.client.send_message(tg_id, f'Новый пользователь в чате: {user.short_name} {user.last_name}\n\n'
                                                 f'Пожалуйста, добавьте его ФИО и ДР')
