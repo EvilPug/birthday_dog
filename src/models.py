@@ -22,7 +22,7 @@ class User(Base):
     bank_account: Mapped[List["BankAccount"]] = relationship()
 
     def __repr__(self):
-        return "User(tg_id=%s, username='%s', first_name='%s', last_name='%s', bday='%s.%s')" % (
+        return "User(tg_id=%s, username='%s', short_name='%s', last_name='%s', bday='%s.%s')" % (
             self.tg_id,
             self.username,
             self.short_name,
