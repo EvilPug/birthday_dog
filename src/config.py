@@ -26,9 +26,9 @@ ADMIN_IDS: List[int] = [int(x) for x in os.environ.get('ADMIN_IDS').split(',')]
 MAIN_CHAT_ID: int = int(os.environ.get('MAIN_CHAT_ID'))
 
 # За сколько дней до ДР должен создаваться чат
-DAYS_BEFORE: int = int(os.environ.get('DAYS_BEFORE'), 7)
+DAYS_BEFORE: int = int(os.environ.get('DAYS_BEFORE', 7))
 
 # Сколько дней после ДР чат должен существовать
-DAYS_AFTER: int = int(os.environ.get('DAYS_AFTER'), 2)
+DAYS_AFTER: int = int(os.environ.get('DAYS_AFTER', 2))
 
 engine: Engine = create_engine(f'mariadb+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
