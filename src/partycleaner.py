@@ -78,11 +78,11 @@ class PartyCleaner:
             return
 
         for channel in channels_to_clean:
+
             self.delete_channel(channel.chat_id)
             data.deactivate_chat(channel.chat_id)
 
-            chat_info = self.client.get_entity(channel.chat_id)
-            logging.info(f'Деактивирован канал в БД {chat_info.title}')
+            logging.info(f'Деактивирован канал в БД {channel.chat_id}')
             time.sleep(10)
         return
 
