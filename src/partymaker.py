@@ -205,7 +205,7 @@ class PartyMaker:
                     logging.info(f'Успешно добавлен админ. tgid: {admin_id}')
 
                 except Exception as e:
-                    logging.info(e, f'Не удалось пригласить админа. tgid: {admin_id}')
+                    logging.info(f'{e}. Не удалось пригласить админа. tgid: {admin_id}')
 
                 finally:
                     time.sleep(self.to_sleep)
@@ -241,7 +241,7 @@ class PartyMaker:
 
             # TODO: Обработать FloodWaitError и UserChannelsTooMuchError
             except Exception as e:
-                logging.info(e, f'Не удалось пригласить пользователя {user.short_name}. tgid: {user.tg_id}')
+                logging.info(f'{e}. Не удалось пригласить пользователя {user.short_name}. tgid: {user.tg_id}')
 
                 if send_invites:
                     self.send_unable_message(user)
