@@ -74,7 +74,6 @@ class FindBirthday:
             bdate = pd.Timestamp(today.year+1, birth_month, birth_day)
 
         bday_interval = pd.Interval(bdate - pd.DateOffset(before), bdate + pd.DateOffset(after), closed='right')
-        print(bday_interval)
         return True if today in bday_interval else False
 
     @staticmethod
