@@ -45,7 +45,7 @@ class FindBirthday:
                     assert self.check_chat_not_created(user.tg_id)
                     self.birthday_users.append(user)
                 else:
-                    print('Not Active User: ', user)
+                    logging.info('Not Active User: {user}')
             except AssertionError:
                 continue
         return self.birthday_users
@@ -65,8 +65,16 @@ class FindBirthday:
         """
 
         today = pd.Timestamp(datetime.now())
+
         bdate = pd.Timestamp(today.year, birth_month, birth_day)
+        chat_creation_date = bdate - pd.DateOffset(before)
+
+        # Обработка дней рождения созадваемых в конце декабря на следующий год
+        if chat_creation_date.year != today.year:
+            bdate = pd.Timestamp(today.year+1, birth_month, birth_day)
+
         bday_interval = pd.Interval(bdate - pd.DateOffset(before), bdate + pd.DateOffset(after), closed='right')
+        print(bday_interval)
         return True if today in bday_interval else False
 
     @staticmethod
