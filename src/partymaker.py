@@ -124,7 +124,7 @@ class PartyMaker:
                                                  f"{money_link}\n\n"
                                                  f"P.S. просьба переводить денюжку только по ссылке"
                                                  )
-            logging.info(f'В чат отправлено введение')
+
 
             # Закрепляем сообщение
             try:
@@ -137,6 +137,8 @@ class PartyMaker:
             self.client.send_message(self.channel.id,
                                      f"Приглашать пользователей в чат можно по ссылке: {self.invite_link}"
                                      )
+
+            logging.info(f'В чат отправлено введение')
         except Exception as e:
             logging.info(f'Не удалось отправить сообщение в чат! Ошибка: {e}')
 

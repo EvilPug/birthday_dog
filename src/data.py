@@ -134,8 +134,6 @@ def log_added_invited(chat_id: int, added: int, invited: int) -> Chat:
         chat.users_added = added
         chat.users_invited = invited
         session.commit()
-
-        logging.info(f'Инфо о добавленных и приглашенных в чат добавлено в БД. Чат: {chat}')
         return chat
 
 
