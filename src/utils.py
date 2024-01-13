@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List
+from typing import List, Type
 from datetime import datetime
 from telethon.sync import TelegramClient
 
@@ -69,11 +69,12 @@ class FindBirthday:
         bdate = pd.Timestamp(today.year, birth_month, birth_day)
         chat_creation_date = bdate - pd.DateOffset(before)
 
-        # Обработка дней рождения созадваемых в конце декабря на следующий год
+        # Обработка дней рождения создаваемых в конце декабря на следующий год
         if chat_creation_date.year != today.year:
             bdate = pd.Timestamp(today.year+1, birth_month, birth_day)
 
-        bday_interval = pd.Interval(bdate - pd.DateOffset(before), bdate + pd.DateOffset(after), closed='right')
+        bday_interval = pd.Interval(bdate - pd.DateOffset(before), bdate
+                                    + pd.DateOffset(after), closed='right')
         return True if today in bday_interval else False
 
     @staticmethod
@@ -92,22 +93,26 @@ class ChatTools:
 
     def __init__(self, client: TelegramClient, chat_id: int):
         self.client = client
-        self.dog_tg_id = self.client.get_me()
+        self.bot = self.client.get_me()
 
-        self.users_in_db = data.get_active_users()
-        self.users_in_db_ids = [x.tg_id for x in self.users_in_db]
+        self.all_users_in_db = data.get_all_users()
+        self.all_users_in_db_ids = [x.tg_id for x in self.all_users_in_db]
 
-        self.users_in_chat = [u for u in client.get_participants(chat_id, aggressive=True) if u.id != self.dog_tg_id]
+        self.active_users_in_db = data.get_active_users()
+        self.active_users_in_db_ids = [x.tg_id for x in self.active_users_in_db]
+
+        participants = client.get_participants(chat_id, aggressive=True)
+        self.users_in_chat = [u for u in participants if u.id != self.bot.id]
         self.users_in_chat_ids = [x.id for x in self.users_in_chat]
 
-    def find_db_users_not_in_chat(self) -> List[User]:
+    def find_db_users_not_in_chat(self) -> List[Type[User]]:
         """
         Находит пользователей, которые есть в БД, но отсутствуют в чате.
 
         :return: Список tg_id пользователей
         """
-        not_in_chat_ids = list(set(self.users_in_db_ids).difference(self.users_in_chat_ids))
-        users = [u for u in self.users_in_db if u.tg_id in not_in_chat_ids]
+        not_in_chat_ids = list(set(self.active_users_in_db_ids).difference(self.users_in_chat_ids))
+        users = [u for u in self.active_users_in_db if u.tg_id in not_in_chat_ids]
         logging.info(f'Найдены активные пользователи не состоящие в чате: {users}', )
         return users
 
@@ -117,10 +122,10 @@ class ChatTools:
 
         :return: Список tg_id пользователей
         """
-        not_in_db_ids = list(set(self.users_in_chat_ids).difference(self.users_in_db_ids))
+        not_in_db_ids = list(set(self.users_in_chat_ids).difference(self.all_users_in_db_ids))
         users = [u for u in self.users_in_chat if u.id in not_in_db_ids]
 
-        users_info = [(i.id, i.username, i.short_name, i.last_name) for i in users]
+        users_info = [(i.id, i.username, i.first_name, i.last_name) for i in users]
         logging.info(f'Найдены пользователи чата, не добавленные в БД: {users_info}', )
         return users
 
@@ -139,15 +144,17 @@ class ChatTools:
 
                 # Оповещаем администраторов об удаленном пользователе
                 for tg_id in config.ADMIN_IDS:
-                    self.client.send_message(tg_id, f'Удален пользователь {user.short_name} {user.last_name}'
-                                                    f', так как он покинул чат ЦПУ')
+                    self.client.send_message(tg_id, f"""Удален пользователь 
+                                                    {user.short_name} {user.last_name}
+                                                    , так как он покинул чат ЦПУ""")
 
             except Exception as e:
                 # Оповещаем администраторов об ошибке
                 for tg_id in config.ADMIN_IDS:
                     self.client.send_message(tg_id,
-                                             f'Не удалось удалить пользователя {user.short_name} {user.last_name}\n'
-                                             f'Ошибка: {e}')
+                                             f"""Не удалось удалить пользователя 
+                                             {user.short_name} {user.last_name}\n
+                                             Ошибка: {e}""")
 
     def notify_about_new_users(self):
         """
@@ -159,5 +166,6 @@ class ChatTools:
 
         for user in new_users:
             for tg_id in config.ADMIN_IDS:
-                self.client.send_message(tg_id, f'Новый пользователь в чате: {user.short_name} {user.last_name}\n\n'
-                                                f'Пожалуйста, добавьте его ФИО и ДР')
+                self.client.send_message(tg_id, f"""Новый пользователь в чате: 
+                                                {user.short_name} {user.last_name}\n\n
+                                                Пожалуйста, добавьте его ФИО и ДР""")
