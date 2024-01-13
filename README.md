@@ -1,5 +1,6 @@
 # BIRTHDAY DOG
 ## Собака Поздравляка - Бот для создания чатов дней рождения
+https://github.com/EvilPug/birthday_dog
 
 ## Как появился бот
 ### Проблема
