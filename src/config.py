@@ -25,6 +25,9 @@ ADMIN_IDS: List[int] = [int(x) for x in os.environ.get('ADMIN_IDS').split(',')]
 # id основного чата с пользователями
 MAIN_CHAT_ID: int = int(os.environ.get('MAIN_CHAT_ID'))
 
+# номер карты для перевода на случай ошибок Тинькофф
+CARD_NUMBER: str = os.environ.get('CARD_NUMBER', '')
+
 # За сколько дней до ДР должен создаваться чат
 DAYS_BEFORE: int = int(os.environ.get('DAYS_BEFORE', 7))
 
