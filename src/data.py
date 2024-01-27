@@ -227,3 +227,7 @@ def deactivate_user(tg_id: int) -> bool:
 
         except exc.NoResultFound:
             return False
+
+
+if __name__ == '__main__':
+    create_db_and_tables()
