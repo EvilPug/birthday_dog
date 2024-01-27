@@ -40,7 +40,7 @@ https://github.com/EvilPug/birthday_dog
 2) Перейдите на сайт https://my.telegram.org/auth, авторизуйтесь и получите API_ID и API_HASH
 3) Создайте **.env** файл в папке **src** со следующим содержанием:
     ```
-    # Переменные, связанные с БД
+    # Переменные, для подключения к БД
     DB_HOST=''
     DB_PORT=''
     DB_USER=''
@@ -58,6 +58,9 @@ https://github.com/EvilPug/birthday_dog
     
     # id основного чата с пользователями
     MAIN_CHAT_ID=''
+   
+    # номер карты для перевода на случай ошибок Тинькофф
+    CARD_NUMBER='0000 0000 0000 0000'
 
     # За сколько дней до ДР должен создаваться чат
     DAYS_BEFORE=7
@@ -67,13 +70,18 @@ https://github.com/EvilPug/birthday_dog
 
     ```
 
-    
-
 4) Создайте виртуальное окружение и установите зависимости
     ```
     python -m venv venv
     . ./venv/bin/activate
     pip3 install -r requirements.txt
     ```
-5) Добавьте таски в шедулер
+5) Запустите файл **data.py**, чтобы создать таблицы в БД
+    ```
+    python src/data.py
+    ```
+
+6) Заполните таблицы **users** и **bank_accounts** данными
+
+7) Добавьте таски в шедулер
 - Если используете cron - добавьте запуск main.py по расписанию
