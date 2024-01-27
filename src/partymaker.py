@@ -117,14 +117,15 @@ class PartyMaker:
             else:
                 money_link = data.get_account_link(self.channel.id)
 
-            intro_msg = self.client.send_message(self.channel.id,
-                                                 f"Всем привет! {self.bdayer.short_name} {self.bdayer.last_name} "
-                                                 f"отмечает день рождения {self.bday_str}!\n\n"
-                                                 "Собираем денюжку по ссылке: "
-                                                 f"{money_link}\n\n"
-                                                 f"P.S. просьба переводить денюжку только по ссылке"
-                                                 )
+            intro_text = f"""Всем привет! {self.bdayer.short_name} {self.bdayer.last_name} 
+                             отмечает день рождения {self.bday_str}!\n\n
+                             Собираем денюжку по ссылке: {money_link}\n\n"
+                             Если у вас проблемы с переводом по ссылке, 
+                             можно перевести по номеру карты:\n
+                             {config.CARD_NUMBER}\n
+                             (Обязательно указывайте именинника в комментариях к платежу)"""
 
+            intro_msg = self.client.send_message(self.channel.id, intro_text)
 
             # Закрепляем сообщение
             try:
@@ -135,7 +136,8 @@ class PartyMaker:
 
             time.sleep(random.uniform(*self.sleep_minmax))
             self.client.send_message(self.channel.id,
-                                     f"Приглашать пользователей в чат можно по ссылке: {self.invite_link}"
+                                     f"Приглашать пользователей в чат "
+                                     f"можно по ссылке: {self.invite_link}"
                                      )
 
             logging.info(f'В чат отправлено введение')
@@ -220,13 +222,14 @@ class PartyMaker:
         """
         for admin_id in config.ADMIN_IDS:
             if admin_id != self.bdayer.tg_id:
-                self.client.edit_admin(self.channel.id, admin_id, is_admin=True, anonymous=False, title='друг собаки')
+                self.client.edit_admin(self.channel.id, admin_id, is_admin=True,
+                                       anonymous=False, title='друг собаки')
                 logging.info(f'Пользователю {admin_id} выданы права администратора')
 
     def invite_users_to_channel(self, send_invites=False) -> None:
         """
         Добавляет пользователей в чат, если позволяют их настройки приватности.
-        Если добавить пользователя не удалось, ему отправляется ссылка с приглашением в личные сообщения
+        Если добавить пользователя не удалось, ему отправляется ссылка с приглашением в ЛС
 
         :type send_invites: Флаг, указывающий на то, отправляются ли пользователям приглашения
         :return: None
