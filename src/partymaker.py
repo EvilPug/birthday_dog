@@ -117,13 +117,15 @@ class PartyMaker:
             else:
                 money_link = data.get_account_link(self.channel.id)
 
-            intro_text = f"""Всем привет! {self.bdayer.short_name} {self.bdayer.last_name} 
-                             отмечает день рождения {self.bday_str}!\n\n
-                             Собираем денюжку по ссылке: {money_link}\n\n"
-                             Если у вас проблемы с переводом по ссылке, 
-                             можно перевести по номеру карты:\n
-                             {config.CARD_NUMBER}\n
-                             (Обязательно указывайте именинника в комментариях к платежу)"""
+            intro_text = (
+                f"Всем привет! {self.bdayer.short_name} {self.bdayer.last_name}"
+                f"отмечает день рождения {self.bday_str}!\n\n"
+                f"Собираем денюжку по ссылке: {money_link}\n\n"
+                "Если у вас проблемы с переводом по ссылке,"
+                "можно перевести по номеру карты:\n"
+                f"{config.CARD_NUMBER}\n"
+                "(Обязательно указывайте именинника в комментариях к платежу)"
+            )
 
             intro_msg = self.client.send_message(self.channel.id, intro_text)
 
@@ -140,7 +142,7 @@ class PartyMaker:
                                      f"можно по ссылке: {self.invite_link}"
                                      )
 
-            logging.info(f'В чат отправлено введение')
+            logging.info('В чат отправлено введение')
         except Exception as e:
             logging.info(f'Не удалось отправить сообщение в чат! Ошибка: {e}')
 
@@ -156,16 +158,18 @@ class PartyMaker:
         :return: None
         """
 
+        unable_message = (
+            "Привет! Не получилось отравить тебе приглашение, "
+            "потому что меня нет у тебя в контактах \U0001F622\n"
+            f"{self.bdayer.short_name} {self.bdayer.last_name} "
+            f"отмечает день рождения {self.bday_str}!\n\n"
+            f"Пожалуйста, вступи в группу по ссылке:\n {self.invite_link} \n\n"
+            "P.S. Чтобы в будущем все было окей - можешь добавить меня "
+            "в контакты или изменить настройки приватности\n"
+        )
+
         try:
-            self.client.send_message(user.tg_id,
-                                     "Привет! Не получилось отравить тебе приглашение, "
-                                     "потому что меня нет у тебя в контактах \U0001F622\n"
-                                     f"{self.bdayer.short_name} {self.bdayer.last_name} "
-                                     f"отмечает день рождения {self.bday_str}!\n\n"
-                                     f"Пожалуйста, вступи в группу по ссылке:\n {self.invite_link} \n\n"
-                                     "P.S. Чтобы в будущем все было окей - можешь добавить меня "
-                                     "в контакты или изменить настройки приватности\n"
-                                     )
+            self.client.send_message(user.tg_id, unable_message)
             self.successfully_invited.append(user)
             logging.info(f'Пользователю {user.short_name} {user.last_name} отправлено приглашение в чат')
 
