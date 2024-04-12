@@ -1,15 +1,16 @@
 import sys
 import time
 from typing import List
-from telethon.sync import TelegramClient
-from telethon.tl.functions.channels import DeleteChannelRequest, GetChannelsRequest
+
 from telethon.errors.rpcerrorlist import ChannelPrivateError
+from telethon.sync import TelegramClient
+from telethon.tl.functions.channels import DeleteChannelRequest
 from telethon.tl.types import PeerChannel
 
-import data
 import config
-from models import Chat
+import data
 from logger import logging
+from models import Chat
 from utils import signin, FindBirthday
 
 
@@ -22,7 +23,7 @@ class PartyCleaner:
         self.client: TelegramClient = client
         self.active_chats = data.get_active_chats()
 
-        logging.info('Инициализирован класс PartyCleaner')
+        logging.info("Инициализирован класс PartyCleaner")
 
     def delete_channel(self, channel_id) -> None:
         """
@@ -34,9 +35,9 @@ class PartyCleaner:
         try:
             channel = self.client.get_entity(PeerChannel(channel_id))
             self.client(DeleteChannelRequest(channel_id))
-            logging.info(f'Удален канал в телеграме {channel.title}')
+            logging.info(f"Удален канал в телеграме {channel.title}")
         except ChannelPrivateError:
-            logging.info('Похоже, что канал в телеграме был удален вручную')
+            logging.info("Похоже, что канал в телеграме был удален вручную")
 
     def send_channel_notification(self, channel_id) -> None:
         """
@@ -46,10 +47,14 @@ class PartyCleaner:
         :return: None
         """
         channel = self.client.get_entity(channel_id)
-        self.client.send_message(channel_id,
-                                 "Внимание!\n"
-                                 "Ссылка для сбора более не активна! Просьба не отправлять по ней деньги.")
-        logging.info(f'В чат канала {channel.title} отправлено предупреждение об удалении')
+        self.client.send_message(
+            channel_id,
+            "Внимание!\n"
+            "Ссылка для сбора более не активна! Просьба не отправлять по ней деньги.",
+        )
+        logging.info(
+            f"В чат канала {channel.title} отправлено предупреждение об удалении"
+        )
 
     def get_channels_to_clean(self) -> List[Chat]:
         """
@@ -61,7 +66,9 @@ class PartyCleaner:
         chats_to_clean = []
         for chat in self.active_chats:
             bdayer = data.get_chat_bdayer(chat.chat_id)
-            in_birthday_interval = FindBirthday.check_birthday(bdayer.birth_month, bdayer.birth_day)
+            in_birthday_interval = FindBirthday.check_birthday(
+                bdayer.birth_month, bdayer.birth_day
+            )
 
             if not in_birthday_interval:
                 chats_to_clean.append(chat)
@@ -74,7 +81,7 @@ class PartyCleaner:
         channels_to_clean = self.get_channels_to_clean()
 
         if len(channels_to_clean) == 0:
-            logging.info('Нет чатов для очистки')
+            logging.info("Нет чатов для очистки")
             return
 
         for channel in channels_to_clean:
@@ -82,12 +89,12 @@ class PartyCleaner:
             self.delete_channel(channel.chat_id)
             data.deactivate_chat(channel.chat_id)
 
-            logging.info(f'Деактивирован канал в БД {channel.chat_id}')
+            logging.info(f"Деактивирован канал в БД {channel.chat_id}")
             time.sleep(10)
         return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dog_client = signin(config.BOT_API_ID, config.BOT_API_HASH)
 
     with dog_client:

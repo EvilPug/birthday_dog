@@ -1,8 +1,7 @@
+import config
 from utils import ChatTools, signin
 
-import config
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     dog_client = signin(config.BOT_API_ID, config.BOT_API_HASH)
 
     with dog_client:

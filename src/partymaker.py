@@ -1,16 +1,21 @@
+import random
 import sys
 import time
-import random
-from telethon.tl import types
 from typing import List, Tuple
-from telethon.sync import TelegramClient
-from telethon.tl.functions.messages import ExportChatInviteRequest
-from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest, EditPhotoRequest
 
-import data
+from telethon.sync import TelegramClient
+from telethon.tl import types
+from telethon.tl.functions.channels import (
+    CreateChannelRequest,
+    InviteToChannelRequest,
+    EditPhotoRequest,
+)
+from telethon.tl.functions.messages import ExportChatInviteRequest
+
 import config
-from models import User
+import data
 from logger import logging
+from models import User
 from utils import signin, FindBirthday
 
 
@@ -28,11 +33,13 @@ class PartyMaker:
 
         self.chat = None
         self.channel = None
-        self.invite_link: str = ''
+        self.invite_link: str = ""
 
         self.successfully_added: List[User] = []
         self.successfully_invited: List[User] = []
-        self.to_sleep: int = 5  # Обязательно нужно спать между вызовами API, иначе телеграм может забанить аккаунт
+        self.to_sleep: int = (
+            5  # Обязательно нужно спать между вызовами API, иначе телеграм может забанить аккаунт
+        )
         self.sleep_minmax: Tuple[int, int] = (4, 10)
 
         # Обязательные вызовы API
@@ -40,7 +47,7 @@ class PartyMaker:
         client.get_dialogs()
         client.get_participants(main_chat_id, aggressive=True)
 
-        logging.info('Инициализирован класс PartyMaker')
+        logging.info("Инициализирован класс PartyMaker")
 
     @staticmethod
     def convert_birthday(day: int, month: int) -> str:
@@ -56,11 +63,11 @@ class PartyMaker:
         day = str(day)
 
         if len(month) == 1:
-            month = '0' + month
+            month = "0" + month
         if len(day) == 1:
-            day = '0' + day
+            day = "0" + day
 
-        return f'{day}.{month}'
+        return f"{day}.{month}"
 
     def create_channel_for_bdayer(self, log_to_db=True) -> int:
         """
@@ -71,25 +78,33 @@ class PartyMaker:
         """
         try:
 
-            chat_title = f'ДР {self.bdayer.short_name} {self.bdayer.last_name} {self.bday_str}'
-            new_channel = self.client(CreateChannelRequest(title=chat_title,
-                                                           about="",
-                                                           megagroup=True))
+            chat_title = (
+                f"ДР {self.bdayer.short_name} {self.bdayer.last_name} {self.bday_str}"
+            )
+            new_channel = self.client(
+                CreateChannelRequest(title=chat_title, about="", megagroup=True)
+            )
 
             self.channel = new_channel.chats[0]
-            self.invite_link = self.client(ExportChatInviteRequest(self.channel.id)).link
+            self.invite_link = self.client(
+                ExportChatInviteRequest(self.channel.id)
+            ).link
 
-            logging.info(f'Создан канал {chat_title}. ID: {self.channel.id}. Ссылка: {self.invite_link}')
+            logging.info(
+                f"Создан канал {chat_title}. ID: {self.channel.id}. Ссылка: {self.invite_link}"
+            )
 
             # Добавляем запись о создании чата в БД
             if log_to_db:
-                data.log_chat_creation(self.channel.id, self.invite_link, self.bdayer.tg_id)
-                logging.info('Данные со создании чата записаны в БД')
+                data.log_chat_creation(
+                    self.channel.id, self.invite_link, self.bdayer.tg_id
+                )
+                logging.info("Данные со создании чата записаны в БД")
 
             return self.channel
 
         except Exception as e:
-            exit_msg = f'Не удалось создать чат. Ошибка: {e}'
+            exit_msg = f"Не удалось создать чат. Ошибка: {e}"
             logging.info(exit_msg)
             sys.exit(exit_msg)
         finally:
@@ -102,8 +117,10 @@ class PartyMaker:
         :return: None
         """
 
-        file = self.client.upload_file('birthday_pic.png')
-        self.client(EditPhotoRequest(self.channel.id, types.InputChatUploadedPhoto(file)))
+        file = self.client.upload_file("birthday_pic.png")
+        self.client(
+            EditPhotoRequest(self.channel.id, types.InputChatUploadedPhoto(file))
+        )
 
     def send_introduction_to_channel(self, fake_link=False) -> None:
         """
@@ -113,7 +130,7 @@ class PartyMaker:
         """
         try:
             if fake_link:
-                money_link = 'test'
+                money_link = "test"
             else:
                 money_link = data.get_account_link(self.channel.id)
 
@@ -134,17 +151,17 @@ class PartyMaker:
                 self.client.pin_message(self.channel.id, intro_msg, notify=True)
 
             except Exception as e:
-                logging.info(f'Не удалось закрепить сообщение! Ошибка: {e}')
+                logging.info(f"Не удалось закрепить сообщение! Ошибка: {e}")
 
             time.sleep(random.uniform(*self.sleep_minmax))
-            self.client.send_message(self.channel.id,
-                                     f"Приглашать пользователей в чат "
-                                     f"можно по ссылке: {self.invite_link}"
-                                     )
-
-            logging.info('В чат отправлено введение')
+            self.client.send_message(
+                self.channel.id,
+                f"Приглашать пользователей в чат "
+                f"можно по ссылке: {self.invite_link}",
+            )
+            logging.info("В чат отправлено введение")
         except Exception as e:
-            logging.info(f'Не удалось отправить сообщение в чат! Ошибка: {e}')
+            logging.info(f"Не удалось отправить сообщение в чат! Ошибка: {e}")
 
         finally:
             # Имитируем пользователя
@@ -171,10 +188,14 @@ class PartyMaker:
         try:
             self.client.send_message(user.tg_id, unable_message)
             self.successfully_invited.append(user)
-            logging.info(f'Пользователю {user.short_name} {user.last_name} отправлено приглашение в чат')
+            logging.info(
+                f"Пользователю {user.short_name} {user.last_name} отправлено приглашение в чат"
+            )
 
         except Exception as e:
-            logging.info(f'Не удалось отправить приглашение пользователю. {user} Ошибка: {e}')
+            logging.info(
+                f"Не удалось отправить приглашение пользователю. {user} Ошибка: {e}"
+            )
 
         finally:
             time.sleep(self.to_sleep)
@@ -186,7 +207,7 @@ class PartyMaker:
         :return: список пользователей
         """
 
-        logging.info('Формируем список пользователей, которых необходимо пригласить.')
+        logging.info("Формируем список пользователей, которых необходимо пригласить.")
 
         invite_list = []
         for user in self.chat_users:
@@ -195,7 +216,9 @@ class PartyMaker:
                     if user.tg_id not in config.ADMIN_IDS:
                         invite_list.append(user)
 
-        logging.info(f'Список сформирован. Количество приглашенных (исколючая админов): {len(invite_list)}')
+        logging.info(
+            f"Список сформирован. Количество приглашенных (исколючая админов): {len(invite_list)}"
+        )
         return invite_list
 
     def invite_admins(self) -> None:
@@ -210,10 +233,10 @@ class PartyMaker:
             if admin_id != self.bdayer.tg_id:
                 try:
                     self.client(InviteToChannelRequest(self.channel.id, [admin_id]))
-                    logging.info(f'Успешно добавлен админ. tgid: {admin_id}')
+                    logging.info(f"Успешно добавлен админ. tgid: {admin_id}")
 
                 except Exception as e:
-                    logging.info(f'{e}. Не удалось пригласить админа. tgid: {admin_id}')
+                    logging.info(f"{e}. Не удалось пригласить админа. tgid: {admin_id}")
 
                 finally:
                     time.sleep(self.to_sleep)
@@ -226,9 +249,14 @@ class PartyMaker:
         """
         for admin_id in config.ADMIN_IDS:
             if admin_id != self.bdayer.tg_id:
-                self.client.edit_admin(self.channel.id, admin_id, is_admin=True,
-                                       anonymous=False, title='друг собаки')
-                logging.info(f'Пользователю {admin_id} выданы права администратора')
+                self.client.edit_admin(
+                    self.channel.id,
+                    admin_id,
+                    is_admin=True,
+                    anonymous=False,
+                    title="друг собаки",
+                )
+                logging.info(f"Пользователю {admin_id} выданы права администратора")
 
     def invite_users_to_channel(self, send_invites=False) -> None:
         """
@@ -246,17 +274,25 @@ class PartyMaker:
 
                 self.client(InviteToChannelRequest(self.channel.id, [user.tg_id]))
                 self.successfully_added.append(user)
-                logging.info(f'Успешно добавлен {user.short_name} {user.tg_id} {num}/{len(invite_list)}')
+                logging.info(
+                    f"Успешно добавлен {user.short_name} {user.tg_id} {num}/{len(invite_list)}"
+                )
 
             # TODO: Обработать FloodWaitError и UserChannelsTooMuchError
             except Exception as e:
-                logging.info(f'{e}. Не удалось пригласить пользователя {user.short_name}. tgid: {user.tg_id}')
+                logging.info(
+                    f"{e}. Не удалось пригласить пользователя {user.short_name}. tgid: {user.tg_id}"
+                )
 
                 if send_invites:
                     self.send_unable_message(user)
 
             finally:
-                data.log_added_invited(self.channel.id, len(self.successfully_added), len(self.successfully_invited))
+                data.log_added_invited(
+                    self.channel.id,
+                    len(self.successfully_added),
+                    len(self.successfully_invited),
+                )
                 time.sleep(random.uniform(*self.sleep_minmax))
 
     def make_party(self) -> None:
@@ -270,7 +306,7 @@ class PartyMaker:
         self.send_introduction_to_channel()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dog_client = signin(config.BOT_API_ID, config.BOT_API_HASH)
 
     with dog_client:
@@ -282,11 +318,11 @@ if __name__ == '__main__':
 
         if len(birthday_users) != 0:
             bday_user: User = birthday_users[0]
-            logging.info(f'Именинник: {bday_user}')
+            logging.info(f"Именинник: {bday_user}")
 
             pm = PartyMaker(dog_client, chat_id, bday_user)
             pm.make_party()
         else:
-            logging.info('Нет именинников!')
+            logging.info("Нет именинников!")
 
     sys.exit(0)

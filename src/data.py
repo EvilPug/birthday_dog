@@ -1,7 +1,8 @@
-from sqlalchemy import select, exc
 from typing import List, Union, Type
-from sqlalchemy.orm import sessionmaker
+
+from sqlalchemy import select, exc
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm import sessionmaker
 
 from config import engine
 from logger import logging
@@ -50,7 +51,9 @@ def deactivate_chat(chat_id) -> Chat:
         chat.is_active = False
 
         try:
-            account = session.execute(select(BankAccount).filter_by(used_in=chat_id)).scalar_one()
+            account = session.execute(
+                select(BankAccount).filter_by(used_in=chat_id)
+            ).scalar_one()
             account.used_in = None
 
             session.commit()
@@ -72,7 +75,9 @@ def get_chat_bdayer(chat_id: int) -> Union[User, None]:
     with s() as session:
         chat = session.execute(select(Chat).filter_by(chat_id=chat_id)).first()
         if chat:
-            user = session.execute(select(User).filter_by(tg_id=chat[0].bdayer_id)).first()
+            user = session.execute(
+                select(User).filter_by(tg_id=chat[0].bdayer_id)
+            ).first()
             if user:
                 return user[0]
 
@@ -89,14 +94,16 @@ def get_active_chats_for_user(user_id) -> List[Type[Chat]]:
 
     s = make_session()
     with s() as session:
-        chats = session.query(Chat).filter(Chat.bdayer_id == user_id,
-                                           Chat.is_active == True).all()
+        chats = (
+            session.query(Chat)
+            .filter(Chat.bdayer_id == user_id, Chat.is_active == True)
+            .all()
+        )
 
         return chats
 
 
 def log_chat_creation(chat_id, invite_link, bdayer_id) -> Chat:
-
     """
     Добавляет в таблицу chats запись о созданном чате
 
@@ -113,12 +120,11 @@ def log_chat_creation(chat_id, invite_link, bdayer_id) -> Chat:
         session.add(chat)
         session.commit()
 
-        logging.info(f'Запись о создании чата добавлена в таблицу. Чат: {chat}')
+        logging.info(f"Запись о создании чата добавлена в таблицу. Чат: {chat}")
         return chat
 
 
 def log_added_invited(chat_id: int, added: int, invited: int) -> Chat:
-
     """
     Добавляет к существующей записи количество добавленных и приглашенных людей
 
@@ -154,7 +160,6 @@ def get_user(tg_id) -> Union[User, None]:
 
 
 def get_all_users() -> List[Type[User]]:
-
     """
     Получить всех пользователей из таблицы users
     Список отсортирован по месяцу и дню рождения
@@ -169,7 +174,6 @@ def get_all_users() -> List[Type[User]]:
 
 
 def get_active_users() -> List[Type[User]]:
-
     """
     Получить всех пользователей из таблицы users
 
@@ -194,11 +198,15 @@ def get_account_link(chat_id) -> str:
     with s() as session:
 
         try:
-            existing_account = session.query(BankAccount).filter(BankAccount.used_in == chat_id).one()
+            existing_account = (
+                session.query(BankAccount).filter(BankAccount.used_in == chat_id).one()
+            )
             return existing_account.link
 
         except exc.NoResultFound:
-            free_account = session.query(BankAccount).filter(BankAccount.used_in == None).first()
+            free_account = (
+                session.query(BankAccount).filter(BankAccount.used_in == None).first()
+            )
             if free_account is not None:
                 free_account.used_in = chat_id
                 session.commit()
@@ -216,18 +224,18 @@ def deactivate_user(tg_id: int) -> bool:
     """
     s = make_session()
     with s() as session:
-
+        
         try:
             user = session.query(User).filter(User.tg_id == tg_id).one()
             user.is_active = False
             session.commit()
 
-            logging.info(f'Деактивирован пользователь: {user}')
+            logging.info(f"Деактивирован пользователь: {user}")
             return True
 
         except exc.NoResultFound:
             return False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_db_and_tables()

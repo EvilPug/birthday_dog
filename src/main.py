@@ -1,12 +1,13 @@
 import sys
 from typing import List
+
 from telethon.sync import TelegramClient
 
-import data
 import config
+import data
 from models import User
-from partymaker import PartyMaker
 from partycleaner import PartyCleaner
+from partymaker import PartyMaker
 from utils import FindBirthday, ChatTools, signin
 
 
@@ -24,14 +25,14 @@ def main(chat_users: List[User], client: TelegramClient):
 
     # В день должно создаваться не больше одного чата. Во избежание бана от телеграма
     bday_user = birthday_users[0]
-    print('Bday User: ', bday_user)
-    
+    print("Bday User: ", bday_user)
+
     # Мероприятия по созданию чата
     pm = PartyMaker(client, chat_id, bday_user)
     pm.make_party()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dog_client = signin(config.BOT_API_ID, config.BOT_API_HASH)
 
     with dog_client:
