@@ -6,6 +6,7 @@ telethon==1.34.0
 tqdm==4.66.2
 
 # DataBases
+alembic==1.13.1
 mariadb==1.1.10
 pymysql~=1.1.0
 sqlalchemy==2.0.29
