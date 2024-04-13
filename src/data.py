@@ -104,7 +104,7 @@ def get_active_chats_for_user(user_id) -> List[Type[Chat]]:
 
 
 def log_chat_creation(
-    chat_id: int, invite_link: str, bdayer_id: int, account_link: str
+    chat_id: int, invite_link: str, bdayer_id: int, chat_title: str, account_link: str
 ) -> Chat:
     """
     Добавляет в таблицу chats запись о созданном чате
@@ -112,6 +112,7 @@ def log_chat_creation(
     :param chat_id: id чата/канала
     :param invite_link: ссылка для приглашения пользователей
     :param bdayer_id: id именинника, для которого был создан чат
+    :param account_link: название созданного чата
     :param account_link: ссылка банковского счета
     :return: сущность Chat
     """
@@ -125,7 +126,7 @@ def log_chat_creation(
             chat_id=chat_id,
             invite_link=invite_link,
             bdayer_id=bdayer_id,
-            bdayer_last_name=user.last_name,
+            chat_title=chat_title,
             account_link=account_link,
         )
         session.add(chat)

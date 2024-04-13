@@ -39,11 +39,9 @@ class User(Base):
 class Chat(Base):
     __tablename__ = "chats"
     chat_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    chat_title: Mapped[str] = mapped_column(String(64), nullable=True, default=None)
     invite_link: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     bdayer_id: Mapped[int] = mapped_column(ForeignKey("users.tg_id"))
-    bdayer_last_name: Mapped[str] = mapped_column(
-        String(64), nullable=True, default=None
-    )
     created_at = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

@@ -103,6 +103,7 @@ class PartyMaker:
                     chat_id=self.channel.id,
                     invite_link=self.invite_link,
                     bdayer_id=self.bdayer.tg_id,
+                    chat_title=chat_title,
                     account_link=money_link,
                 )
                 logging.info("Данные со создании чата записаны в БД")
