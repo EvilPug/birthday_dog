@@ -103,20 +103,31 @@ def get_active_chats_for_user(user_id) -> List[Type[Chat]]:
         return chats
 
 
-def log_chat_creation(chat_id, invite_link, bdayer_id) -> Chat:
+def log_chat_creation(
+    chat_id: int, invite_link: str, bdayer_id: int, account_link: str
+) -> Chat:
     """
     Добавляет в таблицу chats запись о созданном чате
 
     :param chat_id: id чата/канала
     :param invite_link: ссылка для приглашения пользователей
     :param bdayer_id: id именинника, для которого был создан чат
+    :param account_link: ссылка банковского счета
     :return: сущность Chat
     """
 
     s = make_session()
     with s() as session:
 
-        chat = Chat(chat_id=chat_id, invite_link=invite_link, bdayer_id=bdayer_id)
+        user = session.execute(select(User).filter_by(tg_id=bdayer_id)).first()
+
+        chat = Chat(
+            chat_id=chat_id,
+            invite_link=invite_link,
+            bdayer_id=bdayer_id,
+            bdayer_last_name=user.last_name,
+            account_link=account_link,
+        )
         session.add(chat)
         session.commit()
 
@@ -224,7 +235,7 @@ def deactivate_user(tg_id: int) -> bool:
     """
     s = make_session()
     with s() as session:
-        
+
         try:
             user = session.query(User).filter(User.tg_id == tg_id).one()
             user.is_active = False

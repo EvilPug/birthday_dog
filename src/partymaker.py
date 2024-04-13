@@ -96,8 +96,14 @@ class PartyMaker:
 
             # Добавляем запись о создании чата в БД
             if log_to_db:
+
+                money_link = data.get_account_link(self.channel.id)
+
                 data.log_chat_creation(
-                    self.channel.id, self.invite_link, self.bdayer.tg_id
+                    chat_id=self.channel.id,
+                    invite_link=self.invite_link,
+                    bdayer_id=self.bdayer.tg_id,
+                    account_link=money_link,
                 )
                 logging.info("Данные со создании чата записаны в БД")
 
@@ -135,12 +141,12 @@ class PartyMaker:
                 money_link = data.get_account_link(self.channel.id)
 
             intro_text = (
-                f"Всем привет! {self.bdayer.short_name} {self.bdayer.last_name}"
+                f"Всем привет! {self.bdayer.short_name} {self.bdayer.last_name} "
                 f"отмечает день рождения {self.bday_str}!\n\n"
                 f"Собираем денюжку по ссылке: {money_link}\n\n"
                 "Если у вас проблемы с переводом по ссылке,"
-                "можно перевести по номеру карты:\n"
-                f"{config.CARD_NUMBER}\n"
+                "можно перевести по номеру карты:\n\n"
+                f"{config.CARD_NUMBER}\n\n"
                 "(Обязательно указывайте именинника в комментариях к платежу)"
             )
 

@@ -41,12 +41,16 @@ class Chat(Base):
     chat_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     invite_link: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     bdayer_id: Mapped[int] = mapped_column(ForeignKey("users.tg_id"))
+    bdayer_last_name: Mapped[str] = mapped_column(
+        String(64), nullable=True, default=None
+    )
     created_at = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     users_added: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     users_invited: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     participated: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    account_link: Mapped[str] = mapped_column(String(64), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     user: Mapped["User"] = relationship(back_populates="chats")
