@@ -65,13 +65,14 @@ class PartyCleaner:
 
         chats_to_notify_birthday = []
         for chat in self.active_chats:
-            bdayer = data.get_chat_bdayer(chat.chat_id)
-            bday_today = FindBirthday.check_birthday_today(
-                bdayer.birth_month, bdayer.birth_day
-            )
+            if not chat.notification_birthday_sent:
+                bdayer = data.get_chat_bdayer(chat.chat_id)
+                bday_today = FindBirthday.check_birthday_today(
+                    bdayer.birth_month, bdayer.birth_day
+                )
 
-            if bday_today:
-                chats_to_notify_birthday.append(chat)
+                if bday_today:
+                    chats_to_notify_birthday.append(chat)
         return chats_to_notify_birthday
 
     def get_channels_to_notify_deletion(self) -> List[Type[Chat]]:
@@ -84,13 +85,14 @@ class PartyCleaner:
 
         chats_to_notify_deletion = []
         for chat in self.active_chats:
-            bdayer = data.get_chat_bdayer(chat.chat_id)
-            in_birthday_interval = FindBirthday.check_birthday(
-                bdayer.birth_month, bdayer.birth_day, after=config.DAYS_AFTER - 1
-            )
+            if not chat.notification_deletion_sent:
+                bdayer = data.get_chat_bdayer(chat.chat_id)
+                in_birthday_interval = FindBirthday.check_birthday(
+                    bdayer.birth_month, bdayer.birth_day, after=config.DAYS_AFTER - 1
+                )
 
-            if not in_birthday_interval:
-                chats_to_notify_deletion.append(chat)
+                if not in_birthday_interval:
+                    chats_to_notify_deletion.append(chat)
         return chats_to_notify_deletion
 
     def get_channels_to_clean(self) -> List[Chat]:
