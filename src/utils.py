@@ -84,6 +84,20 @@ class FindBirthday:
         return True if today in bday_interval else False
 
     @staticmethod
+    def check_birthday_today(birth_month: int, birth_day: int) -> bool:
+        """
+        Получает на вход день рождения и проверяет, должен ли существовать чат
+
+        :param birth_day: Календарный день рождения пользователя.
+        :param birth_month: Календарный месяц рождения пользователя.
+        :return: True - если день рождения сегодня, False - если нет.
+        """
+
+        today = pd.Timestamp(datetime.now().date())
+        bdate = pd.Timestamp(today.year, birth_month, birth_day)
+        return True if bdate == today else False
+
+    @staticmethod
     def check_chat_not_created(user_id: int):
         """
         Проверяет, есть ли созданные чаты для именинника

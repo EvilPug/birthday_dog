@@ -49,6 +49,12 @@ class Chat(Base):
     users_invited: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     participated: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     account_link: Mapped[str] = mapped_column(String(64), nullable=True, default=None)
+    notification_birthday_sent: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
+    notification_deletion_sent: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     user: Mapped["User"] = relationship(back_populates="chats")

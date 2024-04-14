@@ -155,6 +155,30 @@ def log_added_invited(chat_id: int, added: int, invited: int) -> Chat:
         return chat
 
 
+def log_notified(
+    chat_id: int, birthday_sent: bool = None, deletion_sent: bool = None
+) -> Chat:
+    """
+    Добавляет к существующей записи количество добавленных и приглашенных людей.
+
+    :param chat_id: Id чата, для которого нужно записать статистику.
+    :param birthday_sent: Отправлено уведомление о дне рождения именинника.
+    :param deletion_sent: Отправлено уведомление о скором удалении чата.
+    :return: Сущность Chat.
+    """
+
+    s = make_session()
+    with s() as session:
+        chat = session.execute(select(Chat).filter_by(chat_id=chat_id)).scalar_one()
+
+        if birthday_sent is not None:
+            chat.notification_birthday_sent = birthday_sent
+        if deletion_sent is not None:
+            chat.notification_deletion_sent = deletion_sent
+        session.commit()
+    return chat
+
+
 def get_user(tg_id) -> Union[User, None]:
     """
     Получить пользователя из БД по tg_id
