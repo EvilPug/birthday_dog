@@ -103,8 +103,8 @@ def get_active_chats_for_user(user_id) -> List[Type[Chat]]:
         return chats
 
 
-def log_chat_creation(
-    chat_id: int, invite_link: str, bdayer_id: int, chat_title: str, account_link: str
+def chat_create(
+    chat_id: int, invite_link: str, bdayer_id: int, chat_title: str
 ) -> Chat:
     """
     Добавляет в таблицу chats запись о созданном чате
@@ -112,22 +112,18 @@ def log_chat_creation(
     :param chat_id: id чата/канала
     :param invite_link: ссылка для приглашения пользователей
     :param bdayer_id: id именинника, для которого был создан чат
-    :param account_link: название созданного чата
-    :param account_link: ссылка банковского счета
+    :param chat_title: название созданного чата
     :return: сущность Chat
     """
 
     s = make_session()
     with s() as session:
 
-        user = session.execute(select(User).filter_by(tg_id=bdayer_id)).first()
-
         chat = Chat(
             chat_id=chat_id,
             invite_link=invite_link,
             bdayer_id=bdayer_id,
             chat_title=chat_title,
-            account_link=account_link,
         )
         session.add(chat)
         session.commit()
@@ -136,23 +132,30 @@ def log_chat_creation(
         return chat
 
 
-def log_added_invited(chat_id: int, added: int, invited: int) -> Chat:
+def chat_update(
+    chat_id: int, added: int = None, invited: int = None, account_link: str = None
+) -> Chat:
     """
-    Добавляет к существующей записи количество добавленных и приглашенных людей
+    Обновляет запись о чате в БД
 
-    :param chat_id: id чата, для которого нужно записать статистику
-    :param added: люди, добавленные в чат напрямую
-    :param invited: люди, которым было выслано приглашение в чат в виде ссылки
-    :return: сущность Chat
+    :param chat_id: Id чата.
+    :param added: Люди, добавленные в чат напрямую.
+    :param invited: Люди, которым было выслано приглашение в чат в виде ссылки.
+    :param account_link: Ссылка на сбор денег. Добавляется отдельно, чтобы хранить статистику.
+    :return: Объект Chat.
     """
 
     s = make_session()
     with s() as session:
         chat = session.execute(select(Chat).filter_by(chat_id=chat_id)).scalar_one()
-        chat.users_added = added
-        chat.users_invited = invited
+        if added is not None:
+            chat.users_added = added
+        if invited is not None:
+            chat.users_invited = invited
+        if account_link is not None:
+            chat.account_link = account_link
         session.commit()
-        return chat
+    return chat
 
 
 def log_notified(

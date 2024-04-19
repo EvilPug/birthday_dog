@@ -97,16 +97,17 @@ class PartyMaker:
             # Добавляем запись о создании чата в БД
             if log_to_db:
 
-                money_link = data.get_account_link(self.channel.id)
-
-                data.log_chat_creation(
+                data.chat_create(
                     chat_id=self.channel.id,
                     invite_link=self.invite_link,
                     bdayer_id=self.bdayer.tg_id,
                     chat_title=chat_title,
-                    account_link=money_link,
                 )
                 logging.info("Данные со создании чата записаны в БД")
+
+                money_link = data.get_account_link(self.channel.id)
+                data.chat_update(chat_id=self.channel.id, account_link=money_link)
+                logging.info("Данные дополнены ссылкой на сбор")
 
             return self.channel
 
@@ -295,7 +296,7 @@ class PartyMaker:
                     self.send_unable_message(user)
 
             finally:
-                data.log_added_invited(
+                data.chat_update(
                     self.channel.id,
                     len(self.successfully_added),
                     len(self.successfully_invited),
